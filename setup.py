@@ -15,7 +15,7 @@ except ImportError:
 from multipart import __version__, __author__, __license__, __doc__
 
 setup(name='multipart',
-      version = '0.2-dev',
+      version = '0.2.dev2',
       description = 'Parser for multipart/form-data.',
       long_description = __doc__,
       author = __author__,
