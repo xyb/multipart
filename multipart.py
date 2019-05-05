@@ -59,11 +59,15 @@ try:
 except ImportError: # pragma: no cover (fallback for Python 2.5)
     from UserDict import DictMixin
 
+
+iteritems = lambda d: (getattr(d, 'iteritems', None) or d.items)()
+
+
 class MultiDict(DictMixin):
     """ A dict that remembers old values for each key """
     def __init__(self, *a, **k):
         self.dict = dict()
-        for k, v in dict(*a, **k).iteritems():
+        for k, v in iteritems(dict(*a, **k)):
             self[k] = v
 
     def __len__(self): return len(self.dict)
@@ -84,12 +88,17 @@ class MultiDict(DictMixin):
         return self.dict[key][index]
 
     def iterallitems(self):
-        for key, values in self.dict.iteritems():
+        for key, values in iteritems(self.dict):
             for value in values:
                 yield key, value
 
-def tob(data, enc='utf8'): # Convert strings to bytes (py2 and py3)
-    return data.encode(enc) if isinstance(data, unicode) else data
+# Convert strings to bytes (py2 and py3)
+if sys.version_info < (3, 0):
+    def tob(data, enc='utf8'):
+        return data.encode(enc) if isinstance(data, unicode) else data
+else:
+    def tob(data, enc='utf8'):
+        return bytes(data, 'utf8') if isinstance(data, str) else data
 
 def copy_file(stream, target, maxread=-1, buffer_size=2*16):
     ''' Read from :stream and write to :target until :maxread or EOF. '''
@@ -412,7 +421,7 @@ def parse_form_data(environ, charset='utf8', strict=False, **kw):
             if stream.read(1): # These is more that does not fit mem_limit
                 raise MultipartError("Request too big. Increase MAXMEM.")
             data = parse_qs(data, keep_blank_values=True)
-            for key, values in data.iteritems():
+            for key, values in iteritems(data):
                 for value in values:
                     forms[key] = value
         else:

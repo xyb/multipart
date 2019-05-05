@@ -40,13 +40,17 @@ class TestHeaderParser(unittest.TestCase):
         self.assertEqual(parse(head+'filename="\\\\test\\bla.txt"')[1]['filename'], 'bla.txt')
 
 
+if sys.version_info < (3, 0):
+    def next(generator):
+        return generator.next()
+
 class TestMultipartParser(unittest.TestCase):
 
     def test_line_parser(self):
         for line in ('foo',''):
             for ending in ('\n','\r','\r\n'):
                 i = mp.MultipartParser(BytesIO(tob(line+ending)), 'foo')
-                i = i._lineiter().next()
+                i = next(i._lineiter())
                 self.assertEqual(i, (tob(line), tob(ending)))
 
     def test_iterlines(self):
